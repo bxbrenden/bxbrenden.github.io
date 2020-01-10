@@ -13,9 +13,6 @@
     src: url("fonts/DejaVuSansMono-Bold.woff") format("woff")
 }
 
-html, body {
-    height: 100%;
-}
 
 html {
     display: table;
