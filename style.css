@@ -1,0 +1,44 @@
+@font-face {
+    font-family: "Open Sans";
+    src: url("fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+
+@font-face {
+    font-family: "Gangster Grotesk Bold";
+    src: url("fonts/GangsterGrotesk-Bold.woff") format("woff")
+}
+
+@font-face {
+    font-family: "DejaVu Sans Mono";
+    src: url("fonts/DejaVuSansMono.woff") format("woff")
+}
+
+body {
+    font-family: "Open Sans";
+    max-width: 772px;
+    margin-left: 400px;
+}
+
+h1, h2, h3 {
+    font-family: "Gangster Grotesk Bold";
+}
+
+h1 {
+    font-size: 250%;
+    text-align: center;
+    margin-top: 45px;
+}
+
+code {
+    font-family: "DejaVu Sans Mono";
+    display: block;
+    white-space: pre-line;
+    padding-left: 10%;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+p {
+    text-indent: 5%;
+    font-size: 1.1em;
+}

@@ -1,8 +1,11 @@
+<!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <link href="style.css" rel="stylesheet">
     </head>
     <body>
-        <h1>Building a Standalone Rust Binary for a Scratch Docker Container</h1>
+        <h1>Building a Standalone Rust Binary<br>for a Scratch Docker Container</h1>
 
         <h2>TL;DR:</h2>
         <p>I wanted to make a standalone Rust binary that would run on a barebones Docker container that contained only that single file. I discovered it was not that straightforward.
@@ -12,7 +15,8 @@
         <p>According to my shallow understanding of Rust, one of its promises is that it compiles into a single binary file that does not require a runtime environment or VM, unlike interpreted languages such as Python and Java.
         This is achieved through a process called static linking, wherein the included Rust libraries and dependencies are all built into the compiled binary.
         In contrast, dynamic linking is a process in which a compiled binary points to shared system libraries that live on the operating system's filesystem, separate from the binary itself.
-        Rust offers static linking as one of its benefits.
+        </p>
+        <p>Rust offers static linking as one of its benefits.
         However, it is unfortunately not that simple.
         According to Rust's documentation, "Pure-Rust dependencies are statically linked by default so you can use created binaries and libraries without installing Rust everywhere. By contrast, native libraries (e.g. libc and libm) are usually dynamically linked..."
         In other words, only Rust dependencies get statically linked by default; all of the non-Rust libraries like C libraries are dynamically linked.
@@ -62,10 +66,10 @@
         </code>
         </p>
 
-        <p>
+        <p>From everything I had read (which honestly wasn't much, as I am just starting to use Docker), this looked passable.
+        The build step seemed to work fine, as shown below:
+
         <code>
-            From everything I had read (which honestly wasn't much, as I am just starting to use Docker), this looked passable.
-            The build step seemed to work fine, as shown below:
             docker build -t test/rust-hello:latest .
             Sending build context to Docker daemon  307.2kB
             Step 1/8 : FROM rust:1.40-stretch as builder
@@ -108,17 +112,18 @@
 
         <h2>Postmortem</h2>
         <p>
+        After some research, I found out that Rust statically links pure Rust dependencies, but it dynamically links C libraries.
+        One can see from the output of the `ldd` command (Linux) or the `otool` command (OS X) which libraries have been dynamically linked:
+
         <code>
-            After some research, I found out that Rust statically links pure Rust dependencies, but it dynamically links C libraries. One can see from the output of the `ldd` command (Linux) or the `otool` command (OS X) which libraries have been dynamically linked:
             otool -L hello/target/release/hello
             hello/target/release/hello:
             /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
             /usr/lib/libresolv.9.dylib (compatibility version 1.0.0, current version 1.0.0)
 
-            <INSERT LDD COMMAND OUTPUT HERE LATER>
-
-        </code></p>
-
+            #INSERT LDD COMMAND OUTPUT HERE LATER
+        </code>
+        </p>
 
         <h2>Statically Link Everything</h2>
         <p>Obviously this was no good. I wanted to statically link every single dependency so I could have a truly standalone binary.
