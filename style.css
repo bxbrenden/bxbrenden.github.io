@@ -99,6 +99,9 @@ p {
     line-height: 1.8em;
 }
 
+p:last-of-type {
+    padding-bottom: 90px;
+}
 blockquote {
     line-height: 1.6em;
     max-width: 80%;
