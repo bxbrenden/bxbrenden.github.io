@@ -1,0 +1,125 @@
+Building a Standalone Rust Binary for a Scratch Docker Container
+
+TL;DR:
+I wanted to make a standalone Rust binary that would run on a barebones Docker container that contained only that single file. I discovered it was not that straightforward.
+
+Background
+According to my shallow understanding of Rust, one of its promises is that it compiles into a single binary file that does not require a runtime environment or VM, unlike interpreted languages such as Python and Java.
+This is achieved through a process called static linking, wherein the included Rust libraries and dependencies are all built into the compiled binary.
+In contrast, dynamic linking is a process in which a compiled binary points to shared system libraries that live on the operating system's filesystem, separate from the binary itself.
+Rust offers static linking as one of its benefits.
+However, it is unfortunately not that simple.
+According to Rust's documentation, "Pure-Rust dependencies are statically linked by default so you can use created binaries and libraries without installing Rust everywhere. By contrast, native libraries (e.g. libc and libm) are usually dynamically linked..."
+In other words, only Rust dependencies get statically linked by default; all of the non-Rust libraries like C libraries are dynamically linked.
+In most scenarios, this dynamic linking is not a problem.
+Afer all, the system that you copy your compiled executable to will likely have the required libraries.
+This is not the case for a barebones docker container, as we will see.
+
+Barebones Docker Containers
+Docker containers come in a variety of flavors, most of which are based on lightweight Linux distros.
+There are containers for Ubuntu, Debian, and Alpine Linux, to name a few.
+Despite these containers being tiny operating systems unto themselves, most introductory readings about containers will tell you that treating a container like a virtual machine is an anti-pattern.
+VMs are meant to be fairly long-lived, emulate hardware, and they come with their own kernels.
+Contrast that with containers, which are meant to be ephemeral, emulate the operating system rather than hardware, and rely on the container server's kernel.
+Therefore, I was determined to make Docker "put its money where its mouth is" by spinning up a container that was a glorified chroot evironment whose only outside dependency was the kernel.
+
+Initial Setup
+Rust Hello World
+Using Rust's cargo command, one can make a hello world binary with just a few commands:
+cargo new hello
+cd hello
+cargo build --release
+
+The resultant binary will work on another computer of the same type as the one where it was compiled.
+If I compile it on macOS X Mojave, I can give just the opaque binary to someone else running Mojave and be pretty sure it will run.
+Because of this assurance, I had never really dug any deeper.
+
+Dockerfile
+I used a multi-stage Dockerfile to define two containers-- one for building the binary and one for running it.
+It looked like this:
+
+# Create the build container to compile the hello world program
+FROM rust:1.40-stretch as builder
+ENV USER root
+RUN cargo new hello
+WORKDIR hello
+RUN cargo build --release
+
+# Create the execution container by copying the compiled hello world to it and running it
+FROM scratch
+COPY --from=builder /hello/target/release/hello /hello
+CMD ["/hello"]
+
+From everything I had read (which honestly wasn't much, as I am just starting to use Docker), this looked passable.
+The build step seemed to work fine, as shown below:
+docker build -t test/rust-hello:latest .
+Sending build context to Docker daemon  307.2kB
+Step 1/8 : FROM rust:1.40-stretch as builder
+ ---> df5aae0d2dbf
+Step 2/8 : ENV USER root
+ ---> Using cache
+ ---> afe8a4cfdde3
+Step 3/8 : RUN cargo new hello
+ ---> Using cache
+ ---> 9a4826f41fca
+Step 4/8 : WORKDIR hello
+ ---> Using cache
+ ---> 2980899a43c9
+Step 5/8 : RUN cargo build --release
+ ---> Using cache
+ ---> 45520d0f5219
+Step 6/8 : FROM scratch
+ --->
+Step 7/8 : COPY --from=builder /hello/target/release/hello /hello
+ ---> Using cache
+ ---> 70634303a372
+Step 8/8 : CMD ["/hello"]
+ ---> Using cache
+ ---> b3d523bdd185
+Successfully built b3d523bdd185
+Successfully tagged test/rust-hello:latest
+
+But, the run resulted in an error:
+docker run test/rust-hello:latest
+standard_init_linux.go:207: exec user process caused "no such file or directory"
+
+At first I thought this was an incompatibility issue between macOS X and linux, so I tried it on my System76 laptop running Debian 9-- the result was the same failure.
+
+Postmortem
+After some research, I found out that Rust statically links pure Rust dependencies, but it dynamically links C libraries. One can see from the output of the `ldd` command (Linux) or the `otool` command (OS X) which libraries have been dynamically linked:
+otool -L hello/target/release/hello
+hello/target/release/hello:
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
+	/usr/lib/libresolv.9.dylib (compatibility version 1.0.0, current version 1.0.0)
+
+<INSERT LDD COMMAND OUTPUT HERE LATER>
+
+Statically Link Everything
+Obviously this was no good. I wanted to statically link every single dependency so I could have a truly standalone binary.
+Some searching yielded two excellent results. On Rust's official documentation, I found an explanation of an alternative to `libc` called `musl`. On GitHub I found a repo called `rust-musl-builder` that is described as a "Docker container for easily building static Rust binaries".
+
+Armed with a new technique, I made a second attempt that did away with the build container, choosing instead to build directly on my System76 laptop assisted by the rust-musl-builder container. The code to build it looked like this:
+alias rust-musl-builder='sudo docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder'
+rust-musl-builder cargo build --release
+
+# the output was sent to a different dir this time
+# check it with ldd to show any dynamically linked libs
+ldd  hello/target/x86_64-unknown-linux-musl/release/hello
+        not a dynamic executable
+
+Then it was time to write a simplified Dockerfile that just copied the build artifact to a scratch container and ran it:
+FROM scratch
+COPY hello/target/x86_64-unknown-linux-musl/release/hello /hello
+CMD ["/hello"]
+
+Build the container image:
+sudo docker build -t test/rust-hello
+
+Finally, it was time for a test run:
+sudo docker run test/rust-hello
+Hello, world!
+
+Success!
+
+Conclusion
+For anyone more experienced with docker containers, this may seem obvious. For me, a person who backed into a DevOps career by way of sysadmin-ing, this was an unexpected challenge. I had always taken it on faith that Rust made binaries that were fully self-sustaining, but ultimately I found this to be only a partial truth. This was a fun learning experience, and I was proud to have figured it out.
