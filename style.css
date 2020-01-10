@@ -13,10 +13,20 @@
     src: url("fonts/DejaVuSansMono-Bold.woff") format("woff")
 }
 
+html, body {
+    height: 100%;
+}
+
+html {
+    display: table;
+    margin: auto;
+}
+
 body {
     font-family: Georgia, serif;
     max-width: 772px;
-    margin-left: 20%;
+    display: table-cell;
+    vertical-align: middle;
 }
 
 h1 {
