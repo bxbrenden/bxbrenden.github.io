@@ -89,3 +89,7 @@ blockquote {
     font-style: oblique;
     font-size: 1.6em;
 }
+
+.comment {
+    font-family: "DejaVu Sans Mono Bold";
+}

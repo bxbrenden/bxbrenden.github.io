@@ -54,14 +54,14 @@
         <p>I used a multi-stage Dockerfile to define two containers-- one for building the binary and one for running it.
         It looked like this:
         <code>
-            # Create the build container to compile the hello world program
+            <span class="comment"># Create the build container to compile the hello world program</span>
             FROM rust:1.40-stretch as builder
             ENV USER root
             RUN cargo new hello
             WORKDIR hello
             RUN cargo build --release
 
-            # Create the execution container by copying the compiled hello world to it and running it
+            <span class="comment"># Create the execution container by copying the compiled hello world to it and running it</span>
             FROM scratch
             COPY --from=builder /hello/target/release/hello /hello
             CMD ["/hello"]
@@ -118,12 +118,24 @@
         One can see from the output of the <span><code>ldd</code></span> command (Linux) or the <span><code>otool</code></span> command (OS X) which libraries have been dynamically linked:
 
         <code>
+            <span class="comment"># on macOSX Mojave</span>
+
             otool -L hello/target/release/hello
             hello/target/release/hello:
             /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
             /usr/lib/libresolv.9.dylib (compatibility version 1.0.0, current version 1.0.0)
 
-            #INSERT LDD COMMAND OUTPUT HERE LATER
+            <span class="comment"># on Debian 9 (Linux)</span>
+
+            ldd hello/target/release/hello
+            linux-vdso.so.1 (0x00007ffcab9e3000)
+            libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe82550b000)
+            librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007fe825501000)
+            libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fe8254e0000)
+            libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007fe8254c6000)
+            libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe825305000)
+            /lib64/ld-linux-x86-64.so.2 (0x00007fe825568000)
+
         </code>
         </p>
 
@@ -144,8 +156,8 @@
             alias rust-musl-builder='sudo docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder'
             rust-musl-builder cargo build --release
 
-            # the output was sent to a different dir this time
-            # check it with ldd to show any dynamically linked libs
+            <span class="comment"># the output was sent to a different dir this time</span>
+            <span class="comment"># check it with ldd to show any dynamically linked libs</span>
             ldd  hello/target/x86_64-unknown-linux-musl/release/hello
             not a dynamic executable
         </code>
