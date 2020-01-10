@@ -8,18 +8,20 @@
         <h1>Building a Standalone Rust Binary<br>for a Scratch Docker Container</h1>
 
         <h2>TL;DR:</h2>
-        <p>I wanted to make a standalone Rust binary that would run on a barebones Docker container that contained only that single file. I discovered it was not that straightforward.
+        <p>I wanted to make a standalone Rust binary that would run on a barebones Docker container (basically a <a href="https://unix.stackexchange.com/questions/105/chroot-jail-what-is-it-and-how-do-i-use-it">chroot jail</a>) that contained only that single file. I discovered it was not that straightforward.
         </p>
 
         <h2>Background</h2>
-        <p>According to my shallow understanding of Rust, one of its promises is that it compiles code into a single binary file that does not require a runtime environment or VM, unlike interpreted languages such as Python and Java.
-        This is achieved through a process called static linking, wherein the included Rust libraries and dependencies are all built into the compiled binary.
+        <p>According to my shallow understanding of Rust, one of its promises is that it compiles code into a single binary file that does not require a runtime environment or VM, unlike interpreted languages that compile down to bytecode such as Python and Java.
+        Rust achieves this through a process called static linking, wherein the included Rust libraries and dependencies are all built into the compiled binary.
         In contrast, dynamic linking is a process in which a compiled binary points to shared system libraries that live on the operating system's filesystem, separate from the binary itself.
         </p>
         <p>Rust offers static linking as one of its benefits.
         However, it is unfortunately not that simple.
-        According to Rust's documentation, "Pure-Rust dependencies are statically linked by default so you can use created binaries and libraries without installing Rust everywhere. By contrast, native libraries (e.g. libc and libm) are usually dynamically linked..."<sub><a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#static-linking">[1]</a></sub>.
-        In other words, only Rust dependencies get statically linked by default; all of the non-Rust libraries like C libraries are dynamically linked.
+        According to Rust's documentation,</p>
+        <blockquote>"Pure-Rust dependencies are statically linked by default so you can use created binaries and libraries without installing Rust everywhere. By contrast, native libraries (e.g. libc and libm) are usually dynamically linked..."<sub><a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#static-linking">[1]</a></sub>.
+        </blockquote>
+        <p>In other words, only Rust dependencies get statically linked by default; all of the non-Rust libraries like C libraries are dynamically linked.
         In most scenarios, this dynamic linking is not a problem.
         Afer all, the system that you copy your compiled executable to will likely have the required libraries.
         This is not the case for a barebones docker container, as we will see.
@@ -107,13 +109,13 @@
         </code>
         </p>
 
-        <p>At first I thought this was an incompatibility issue between macOS X and linux, so I tried it on my System76 laptop running Debian 9-- the result was the same failure.
+        <p>At first I thought this was an incompatibility issue between macOS X and linux, so I tried it on my <a href="https://system76.com">System76</a> laptop running Debian 9-- the result was the same failure.
         </p>
 
         <h2>Postmortem</h2>
         <p>
         After some research, I found out that Rust statically links pure Rust dependencies, but it dynamically links C libraries.
-        One can see from the output of the `ldd` command (Linux) or the `otool` command (OS X) which libraries have been dynamically linked:
+        One can see from the output of the <span><code>ldd</code></span> command (Linux) or the <span><code>otool</code></span> command (OS X) which libraries have been dynamically linked:
 
         <code>
             otool -L hello/target/release/hello
@@ -127,9 +129,15 @@
 
         <h2>Statically Link Everything</h2>
         <p>Obviously this was no good. I wanted to statically link every single dependency so I could have a truly standalone binary.
-        Some searching yielded two excellent results. On Rust's official documentation, I found an explanation of an alternative to `libc` called `musl`. On GitHub I found a repo called `rust-musl-builder` that is described as a "Docker container for easily building static Rust binaries".
+        Some searching yielded two excellent results.
+        On Rust's official documentation, I found an <a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#linux">explanation</a> of an alternative to <span><code>libc</code></span>called <span><code>musl</code></span>.
+        <blockquote>"Dynamic linking on Linux can be undesirable if you wish to use new library features on old systems or target systems which do not have the required dependencies for your program to run. Static linking is supported via an alternative libc, musl."<a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#linux"><sub>[2]</sub></a>
         </p>
-
+        </blockquote>
+        <p>So, <span><code>musl</code></span> is an alternative implementation of <span><code>libc</code></span> that developers use to package directly (read: statically link) with Rust binaries so that they are batteries-included.
+        </p>
+        <p><a href="https://github.com/emk/rust-musl-builder">On GitHub</a> I found a repo called <span><code>rust-musl-builder</code></span> that is described as a "Docker container for easily building static Rust binaries".
+        </p>
         <p>
         Armed with a new technique, I made a second attempt that did away with the build container, choosing instead to build directly on my System76 laptop assisted by the rust-musl-builder container. The code to build it looked like this:
         <code>

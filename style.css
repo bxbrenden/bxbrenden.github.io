@@ -14,7 +14,7 @@
 }
 
 body {
-    font-family: Georgia;
+    font-family: Georgia, serif;
     max-width: 772px;
     margin-left: 20%;
 }
@@ -25,7 +25,7 @@ h1 {
     margin-top: 45px;
     margin-bottom: 40px;
     padding: 25px;
-    background-color: silver;
+    background-color: whitesmoke;
 }
 
 h2 {
@@ -49,19 +49,18 @@ h1, h2, h3 {
     font-family: "Gangster Grotesk Bold";
 }
 
-sub > a:link {
-    color: crimson;
+a:link {
+    color: mediumblue;
 }
 
-sub > a:visited {
-    color: salmon;
+a:visited {
+    color: cornflowerblue;
 }
 
 p code {
     font-family: "DejaVu Sans Mono";
     font-size: .9em;
     line-height: 1.5em;
-    /*background: aliceblue;*/
     background: whitesmoke;
     display: block;
     white-space: pre-line;
@@ -70,7 +69,23 @@ p code {
     border-radius: 25px;
 }
 
+p > span > code {
+    display: inline;
+    border-radius: 5px;
+    padding: 5px 7px 3px 7px;
+    margin-right: 3px;
+}
+
 p {
     font-size: 1.4em;
     line-height: 1.8em;
+}
+
+blockquote {
+    line-height: 1.6em;
+    max-width: 80%;
+    background-color: aliceblue;
+    padding: 10px 8px 0px 12px;
+    font-style: oblique;
+    font-size: 1.6em;
 }
