@@ -49,6 +49,13 @@ h1, h2, h3 {
     font-family: "Gangster Grotesk Bold";
 }
 
+h4 {
+    margin-top: -20px;
+    font-family: "DejaVu Sans Mono";
+    color: gray;
+    text-align: center;
+}
+
 a:link {
     color: mediumblue;
 }
