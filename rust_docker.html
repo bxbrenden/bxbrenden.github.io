@@ -12,13 +12,13 @@
         </p>
 
         <h2>Background</h2>
-        <p>According to my shallow understanding of Rust, one of its promises is that it compiles into a single binary file that does not require a runtime environment or VM, unlike interpreted languages such as Python and Java.
+        <p>According to my shallow understanding of Rust, one of its promises is that it compiles code into a single binary file that does not require a runtime environment or VM, unlike interpreted languages such as Python and Java.
         This is achieved through a process called static linking, wherein the included Rust libraries and dependencies are all built into the compiled binary.
         In contrast, dynamic linking is a process in which a compiled binary points to shared system libraries that live on the operating system's filesystem, separate from the binary itself.
         </p>
         <p>Rust offers static linking as one of its benefits.
         However, it is unfortunately not that simple.
-        According to Rust's documentation, "Pure-Rust dependencies are statically linked by default so you can use created binaries and libraries without installing Rust everywhere. By contrast, native libraries (e.g. libc and libm) are usually dynamically linked..."
+        According to Rust's documentation, "Pure-Rust dependencies are statically linked by default so you can use created binaries and libraries without installing Rust everywhere. By contrast, native libraries (e.g. libc and libm) are usually dynamically linked..."<sub><a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#static-linking">[1]</a></sub>.
         In other words, only Rust dependencies get statically linked by default; all of the non-Rust libraries like C libraries are dynamically linked.
         In most scenarios, this dynamic linking is not a problem.
         Afer all, the system that you copy your compiled executable to will likely have the required libraries.
@@ -100,8 +100,8 @@
         </p>
 
         <p>
+        But, the run resulted in an error:
         <code>
-            But, the run resulted in an error:
             docker run test/rust-hello:latest
             standard_init_linux.go:207: exec user process caused "no such file or directory"
         </code>

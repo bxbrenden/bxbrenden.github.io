@@ -1,9 +1,4 @@
 @font-face {
-    font-family: "Open Sans";
-    src: url("fonts/OpenSans-Regular-webfont.woff") format("woff");
-}
-
-@font-face {
     font-family: "Gangster Grotesk Bold";
     src: url("fonts/GangsterGrotesk-Bold.woff") format("woff")
 }
@@ -13,32 +8,69 @@
     src: url("fonts/DejaVuSansMono.woff") format("woff")
 }
 
-body {
-    font-family: "Open Sans";
-    max-width: 772px;
-    margin-left: 400px;
+@font-face {
+    font-family: "DejaVu Sans Mono Bold";
+    src: url("fonts/DejaVuSansMono-Bold.woff") format("woff")
 }
 
-h1, h2, h3 {
-    font-family: "Gangster Grotesk Bold";
+body {
+    font-family: Georgia;
+    max-width: 772px;
+    margin-left: 20%;
 }
 
 h1 {
     font-size: 250%;
     text-align: center;
     margin-top: 45px;
+    margin-bottom: 40px;
+    padding: 25px;
+    background-color: silver;
 }
 
-code {
+h2 {
+    font-size: 175%;
+}
+
+p ~ h2 {
+    margin-top: 30px;
+}
+
+h3 {
+    font-size: 125%;
+}
+
+h2, h3 {
+    padding-left: 5%;
+    color: crimson;
+}
+
+h1, h2, h3 {
+    font-family: "Gangster Grotesk Bold";
+}
+
+sub > a:link {
+    color: crimson;
+}
+
+sub > a:visited {
+    color: salmon;
+}
+
+p code {
     font-family: "DejaVu Sans Mono";
+    font-size: .9em;
+    line-height: 1.5em;
+    /*background: aliceblue;*/
+    background: whitesmoke;
     display: block;
     white-space: pre-line;
-    padding-left: 10%;
+    padding: 1% 8% 5%;
     margin-top: 12px;
-    margin-bottom: 12px;
+    border-radius: 25px;
 }
 
 p {
-    text-indent: 5%;
-    font-size: 1.1em;
+    font-size: 1.4em;
+    line-height: 1.8em;
 }
