@@ -115,3 +115,9 @@ blockquote {
 .comment {
     font-family: "DejaVu Sans Mono Bold";
 }
+
+.prompt:before {
+    content: "brenden$:> ";
+    font-weight: bold;
+    color: dodgerblue;
+}

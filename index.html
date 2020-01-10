@@ -41,9 +41,9 @@
         <h3>Rust Hello World</h3>
         <p>Using Rust's cargo command, one can make a hello world binary with just a few commands:
         <code>
-            cargo new hello
-            cd hello
-            cargo build --release
+            <span class="prompt">cargo new hello</span>
+            <span class="prompt">cd hello</span>
+            <span class="prompt">cargo build --release</span>
         </code>
         </p>
         <p>The resultant binary will work on another computer of the same type as the one where it was compiled.
@@ -73,7 +73,7 @@
         The build step seemed to work fine, as shown below:
 
         <code>
-            docker build -t test/rust-hello:latest .
+            <span class="prompt">docker build -t test/rust-hello:latest .</span>
             Sending build context to Docker daemon  307.2kB
             Step 1/8 : FROM rust:1.40-stretch as builder
             ---> df5aae0d2dbf
@@ -105,7 +105,7 @@
         <p>
         But, the run resulted in an error:
         <code>
-            docker run test/rust-hello:latest
+            <span class="prompt">docker run test/rust-hello:latest</span>
             standard_init_linux.go:207: exec user process caused "no such file or directory"
         </code>
         </p>
@@ -121,14 +121,14 @@
         <code>
             <span class="comment"># on macOSX Mojave</span>
 
-            otool -L hello/target/release/hello
+            <span class="prompt">otool -L hello/target/release/hello</span>
             hello/target/release/hello:
             /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
             /usr/lib/libresolv.9.dylib (compatibility version 1.0.0, current version 1.0.0)
 
             <span class="comment"># on Debian 9 (Linux)</span>
 
-            ldd hello/target/release/hello
+            <span class="prompt">ldd hello/target/release/hello</span>
             linux-vdso.so.1 (0x00007ffcab9e3000)
             libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe82550b000)
             librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007fe825501000)
@@ -144,8 +144,8 @@
         <p>Obviously this was no good. I wanted to statically link every single dependency so I could have a truly standalone binary.
         Some searching yielded two excellent results.
         On Rust's official documentation, I found an <a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#linux">explanation</a> of an alternative to <span><code>libc</code></span>called <span><code>musl</code></span>.
-        <blockquote>"Dynamic linking on Linux can be undesirable if you wish to use new library features on old systems or target systems which do not have the required dependencies for your program to run. Static linking is supported via an alternative libc, musl."<a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#linux"><sub>[2]</sub></a>
         </p>
+        <blockquote>"Dynamic linking on Linux can be undesirable if you wish to use new library features on old systems or target systems which do not have the required dependencies for your program to run. Static linking is supported via an alternative libc, musl."<a href="https://doc.rust-lang.org/1.13.0/book/advanced-linking.html#linux"><sub>[2]</sub></a>
         </blockquote>
         <p>So, <span><code>musl</code></span> is an alternative implementation of <span><code>libc</code></span> that developers use to package directly (read: statically link) with Rust binaries so that they are batteries-included.
         </p>
@@ -154,17 +154,17 @@
         <p>
         Armed with a new technique, I made a second attempt that did away with the build container, choosing instead to build directly on my System76 laptop assisted by the rust-musl-builder container. The code to build it looked like this:
         <code>
-            alias rust-musl-builder='sudo docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder'
-            rust-musl-builder cargo build --release
+            <span class="prompt">alias rust-musl-builder='sudo docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder'</span>
+            <span class="prompt">rust-musl-builder cargo build --release</span>
 
             <span class="comment"># the output was sent to a different dir this time</span>
             <span class="comment"># check it with ldd to show any dynamically linked libs</span>
-            ldd  hello/target/x86_64-unknown-linux-musl/release/hello
+            <span class="prompt">ldd  hello/target/x86_64-unknown-linux-musl/release/hello</span>
             not a dynamic executable
         </code>
         </p>
 
-        <p>Then it was time to write a simplified Dockerfile that just copied the build artifact to a scratch container and ran it:
+        <p>Then it was time to write a simplified <span><code>Dockerfile</code></span> that just copied the build artifact to a scratch container and ran it:
         <code>
             FROM scratch
             COPY hello/target/x86_64-unknown-linux-musl/release/hello /hello
@@ -174,13 +174,13 @@
 
         <p>Build the container image:
         <code>
-            sudo docker build -t test/rust-hello
+            <span class="prompt">sudo docker build -t test/rust-hello</span>
         </code>
         </p>
 
         <p>Finally, it was time for a test run:
         <code>
-            sudo docker run test/rust-hello
+            <span class="prompt">sudo docker run test/rust-hello</span>
             Hello, world!
         </code>
         </p>
