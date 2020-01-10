@@ -103,9 +103,10 @@ blockquote {
     line-height: 1.6em;
     max-width: 80%;
     background-color: aliceblue;
-    padding: 10px 8px 0px 12px;
+    padding: 15px 8px 0px 15px;
     font-style: oblique;
     font-size: 1.6em;
+    border-radius: 25px;
 }
 
 .comment {
