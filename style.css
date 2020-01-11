@@ -116,12 +116,6 @@ blockquote {
     font-family: "DejaVu Sans Mono Bold";
 }
 
-.prompt:before {
-    content: "brenden$:> ";
-    color: dodgerblue;
-    font-size: 1.1em;
-}
-
 .prompt {
     color: dodgerblue;
 }
