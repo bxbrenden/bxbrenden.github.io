@@ -119,6 +119,7 @@ blockquote {
 .prompt:before {
     content: "brenden$:> ";
     color: dodgerblue;
+    font-size: 1.1em;
 }
 
 .prompt {
