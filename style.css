@@ -118,11 +118,9 @@ blockquote {
 
 .prompt:before {
     content: "brenden$:> ";
-    font-weight: bold;
     color: dodgerblue;
 }
 
 .prompt {
-    font-weight: bold;
     color: dodgerblue;
 }
