@@ -155,6 +155,7 @@
         Armed with a new technique, I made a second attempt that did away with the build container, choosing instead to build directly on my System76 laptop assisted by the rust-musl-builder container. The code to build it looked like this:
         <code>
             <span class="prompt">alias rust-musl-builder='sudo docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder'</span>
+
             <span class="prompt">rust-musl-builder cargo build --release</span>
 
             <span class="comment"># the output was sent to a different dir this time</span>
